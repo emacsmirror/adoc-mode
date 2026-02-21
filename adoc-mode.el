@@ -1715,9 +1715,9 @@ text having adoc-reserved set to symbol `block-del'."
    `(lambda (end)
       (and adoc-enable-two-line-title
            (adoc-kwf-search ,(adoc-re-two-line-title del) end t)
-           (< (abs (- (length (match-string 2)) (length (match-string 3)))) 3)
+           (< (abs (- (- (match-end 2) (match-beginning 2)) (- (match-end 3) (match-beginning 3)))) 3)
            (or (not (numberp adoc-enable-two-line-title))
-               (not (equal adoc-enable-two-line-title (length (match-string 2)))))
+               (not (equal adoc-enable-two-line-title (- (match-end 2) (match-beginning 2)))))
            (not (text-property-not-all (match-beginning 0) (match-end 0) 'adoc-reserved nil))))
    ;; highlighers
    `(2 ,text-face t)
