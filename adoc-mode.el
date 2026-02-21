@@ -1614,7 +1614,12 @@ text having adoc-reserved set to symbol `block-del'."
                                                      'adoc-reserved 'block-del)))
                            no-block-del-groups))))
       (when (and found prevented (<= (point) end))
-        (goto-char (1+ (match-beginning 0)))))
+        (let ((next (1+ (match-beginning 0))))
+          ;; Skip past contiguous reserved text to avoid re-matching it
+          (while (and (< next end) (get-text-property next 'adoc-reserved))
+            (setq next (or (next-single-property-change next 'adoc-reserved nil end)
+                           end)))
+          (goto-char next))))
     (and found (not prevented))))
 
 (defun adoc-kwf-attribute-list (end)
