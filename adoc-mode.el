@@ -1334,13 +1334,7 @@ further tests to find a proper xref."
 
    (t (error "unknown type"))))
 
-(defun adoc-re-attribute-list-elt ()
-  "Returns a regexp matching an attribute list element.
-
-Subgroups:
-1 attribute name
-2 attribute value if given as string
-3 attribute value if not given as string"
+(defconst adoc-re-attribute-list-elt
   (concat
    ",?[ \t\n]*"
    "\\(?:\\([a-zA-Z_]+\\)[ \t\n]*=[ \t\n]*\\)?"         ; 1
@@ -1349,7 +1343,13 @@ Subgroups:
    ;; Real "Unrolling-the-Loop" Pattern'.
    "\"\\([^\"\\]*\\(?:\\\\.[^\"\\]*\\)*\\)\"[ \t\n]*" "\\|"   ; 2
    "\\([^,]+\\)"                                      ; 3
-   "\\)"))
+   "\\)")
+  "Regexp matching an attribute list element.
+
+Subgroups:
+1 attribute name
+2 attribute value if given as string
+3 attribute value if not given as string")
 
 (defun adoc-re-precond (&optional unwanted-chars backslash-allowed disallowed-at-bol)
   (concat
@@ -1646,7 +1646,7 @@ text having adoc-reserved set to symbol `block-del'."
              'face prop-of-attribute-list)
 
           ;; for each attribute in current attribute list
-          (while (re-search-forward (adoc-re-attribute-list-elt) attribute-list-end t)
+          (while (re-search-forward adoc-re-attribute-list-elt attribute-list-end t)
             (when (match-beginning 1); i.e. when it'a named attribute
               ;; get attribute's name
               (setq pos-or-name-of-attribute
