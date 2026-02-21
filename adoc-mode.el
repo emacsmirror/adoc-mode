@@ -2104,7 +2104,8 @@ actual source code."
       (and (setq start-src (re-search-forward adoc-code-block-begin-regexp last noerror))
            (setq lang (or (match-string 1) t)
                  start-header (match-beginning 0))
-           (setq end-block (re-search-forward (format "\n%s$" (regexp-quote (match-string 2))) nil t))
+           (setq end-block (re-search-forward (format "\n%s$" (regexp-quote (match-string 2)))
+                                                   (+ (point) adoc-font-lock-extend-after-change-max) t))
            (setq end-src (match-beginning 0)))
       )
     (when end-block
