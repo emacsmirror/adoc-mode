@@ -73,6 +73,31 @@ See also `adoc-display-remote-images'."
 (defconst adoc-re-image "\\<image::?\\([^]]+\\)\\(\\[[^]]*\\]\\)"
   "Regexp matching block- and inline-images.")
 
+(defun adoc--resolve-attribute-references (str)
+  "Resolve AsciiDoc attribute references in STR.
+Replaces occurrences of {name} with the value defined by
+`:name: value' attribute entries in the current buffer.
+References without a matching definition are left unchanged."
+  (if (not (string-match-p "{" str))
+      str
+    (let ((attrs (make-hash-table :test 'equal)))
+      (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char (point-min))
+          (while (re-search-forward
+                  "^:\\([a-zA-Z0-9_][^.\n]*?\\(?:\\..*?\\)?\\):[ \t]+\\(.*?\\)$"
+                  nil t)
+            (puthash (match-string-no-properties 1)
+                     (match-string-no-properties 2)
+                     attrs))))
+      (replace-regexp-in-string
+       "{\\([^}\n]+\\)}"
+       (lambda (match)
+         (let ((name (match-string 1 match)))
+           (gethash name attrs match)))
+       str t t))))
+
 (defvar adoc-image-overlay-functions nil
   "Functions called after the creation of an image overlay.
 Each function is called with the created overlay as argument.")
@@ -116,6 +141,7 @@ Each function is called with the created overlay as argument.")
 
 (defun adoc-create-image-overlay (file start end)
   "Create image overlay with START and END displaying image FILE."
+  (setq file (adoc--resolve-attribute-references file))
   (when (not (zerop (length file)))
     (unless (file-exists-p file)
       (when adoc-display-remote-images

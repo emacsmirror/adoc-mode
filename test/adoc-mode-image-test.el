@@ -63,4 +63,30 @@
                   "title" adoc-attribute-face "=" adoc-meta-face
                   "lorem\nipsum\nsit" adoc-secondary-text-face "]" adoc-meta-face "\n" nil))
 
+(ert-deftest adoctest-test-resolve-attribute-references ()
+  (with-temp-buffer
+    (adoc-mode)
+    (insert ":my-url: https://example.com/image.png\n"
+            ":badge: http://melpa.org/badge.svg\n"
+            "\n"
+            "image:{my-url}[]\n"
+            "image:{badge}[alt]\n"
+            "image:{undefined}[]\n"
+            "image:plain.png[]\n")
+    ;; Single reference
+    (should (equal (adoc--resolve-attribute-references "{my-url}")
+                   "https://example.com/image.png"))
+    ;; Another reference
+    (should (equal (adoc--resolve-attribute-references "{badge}")
+                   "http://melpa.org/badge.svg"))
+    ;; Undefined reference is left unchanged
+    (should (equal (adoc--resolve-attribute-references "{undefined}")
+                   "{undefined}"))
+    ;; No references - returned as-is
+    (should (equal (adoc--resolve-attribute-references "plain.png")
+                   "plain.png"))
+    ;; Empty string
+    (should (equal (adoc--resolve-attribute-references "")
+                   ""))))
+
 ;;; adoc-mode-image-test.el ends here
